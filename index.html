@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>NEON CIRCUIT FC — аркадный футбол</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ======================= SCREEN: BOOT ======================= -->
+<div id="screen-boot" class="screen active">
+  <div class="boot-grid"></div>
+  <div class="boot-content">
+    <div class="logo-mark">
+      <span class="logo-bracket">[</span><span class="logo-text">NEON CIRCUIT</span><span class="logo-bracket">]</span>
+      <div class="logo-sub">F.C. — ARCADE PROTOCOL</div>
+    </div>
+    <div class="boot-bar-track"><div class="boot-bar-fill" id="boot-bar-fill"></div></div>
+    <div class="boot-status" id="boot-status">ИНИЦИАЛИЗАЦИЯ ПОЛЯ…</div>
+  </div>
+</div>
+
+<!-- ======================= SCREEN: MENU ======================= -->
+<div id="screen-menu" class="screen">
+  <canvas id="menu-bg-canvas"></canvas>
+  <div class="menu-wrap">
+    <header class="menu-header">
+      <div class="logo-mark small">
+        <span class="logo-bracket">[</span><span class="logo-text">NEON CIRCUIT</span><span class="logo-bracket">]</span>
+      </div>
+      <div class="menu-tag">ПОДКЛЮЧИСЬ К ПОЛЮ. ЗАБЕЙ. ПЕРЕГРЕЙ СИСТЕМУ.</div>
+    </header>
+
+    <nav class="menu-cards">
+      <button class="menu-card" data-mode="quick" id="card-quick">
+        <div class="card-eyebrow">ПРОТОКОЛ 01</div>
+        <div class="card-title">БЫСТРЫЙ МАТЧ</div>
+        <div class="card-desc">3 минуты. Ты против ИИ. Первая кровь решает темп.</div>
+        <div class="card-glyph">▶</div>
+      </button>
+
+      <button class="menu-card" data-mode="career" id="card-career">
+        <div class="card-eyebrow">ПРОТОКОЛ 02</div>
+        <div class="card-title" id="card-career-title">ЛИГА ОВЕРКЛОКА</div>
+        <div class="card-desc">3 лестницы по 5 соперников. Проигрыш — рестарт лестницы.</div>
+        <div class="card-glyph">▶</div>
+      </button>
+
+      <button class="menu-card" data-mode="training" id="card-training">
+        <div class="card-eyebrow">ПРОТОКОЛ 00</div>
+        <div class="card-title">ТРЕНИРОВКА УДАРА</div>
+        <div class="card-desc">Без соперника. Учись овердрайв-удару и дэшу.</div>
+        <div class="card-glyph">▶</div>
+      </button>
+
+      <button class="menu-card" data-mode="tournament" id="card-tournament">
+        <div class="card-eyebrow">ПРОТОКОЛ 03</div>
+        <div class="card-title">ОНЛАЙН ТУРНИР</div>
+        <div class="card-desc">Заезд на очки против системного соперника. Таблица лидеров — раз в неделю.</div>
+        <div class="card-glyph">▶</div>
+      </button>
+    </nav>
+
+    <div class="menu-footer-row">
+      <button class="ghost-btn" id="btn-settings">НАСТРОЙКИ</button>
+      <button class="ghost-btn" id="btn-howto">УПРАВЛЕНИЕ</button>
+      <button class="ghost-btn" id="btn-squad">СОСТАВ</button>
+      <button class="ghost-btn" id="btn-shop-open">МАГАЗИН</button>
+      <button class="ghost-btn" id="btn-profile">ПРОФИЛЬ</button>
+      <div class="best-streak">
+        ЛУЧШАЯ СЕРИЯ: <span id="best-streak-val">0</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ======================= SCREEN: SETTINGS ======================= -->
+<div id="screen-settings" class="screen overlay-screen">
+  <div class="panel">
+    <div class="panel-title">НАСТРОЙКИ</div>
+
+    <div class="setting-row">
+      <label>Громкость звука</label>
+      <input type="range" id="set-volume" min="0" max="100" value="70">
+    </div>
+
+    <div class="setting-row">
+      <label>Сложность ИИ</label>
+      <div class="seg-control" id="set-difficulty">
+        <button data-val="easy">ЛЁГКО</button>
+        <button data-val="normal" class="active">НОРМА</button>
+        <button data-val="hard">ЖЁСТКО</button>
+      </div>
+    </div>
+
+    <div class="setting-row">
+      <label>Экранная вибрация (camera shake)</label>
+      <div class="seg-control" id="set-shake">
+        <button data-val="on" class="active">ВКЛ</button>
+        <button data-val="off">ВЫКЛ</button>
+      </div>
+    </div>
+
+    <div class="setting-row">
+      <label>Длительность матча</label>
+      <div class="seg-control" id="set-duration">
+        <button data-val="90">1:30</button>
+        <button data-val="180" class="active">3:00</button>
+        <button data-val="300">5:00</button>
+      </div>
+    </div>
+
+    <div class="setting-row">
+      <label>Авто-переключение на игрока у мяча</label>
+      <div class="seg-control" id="set-autoswitch">
+        <button data-val="on" class="active">ВКЛ</button>
+        <button data-val="off">ВЫКЛ</button>
+      </div>
+    </div>
+
+    <div class="setting-row">
+      <label>Ник для таблицы турнира</label>
+      <input type="text" id="set-player-name" maxlength="16" placeholder="ИГРОК-XXXX" class="text-input">
+    </div>
+
+    <div class="setting-row">
+      <label>URL турнирного сервера (после деплоя Worker'а)</label>
+      <input type="text" id="set-tournament-url" placeholder="https://…workers.dev" class="text-input">
+      <div class="setting-hint" id="tournament-status-hint">Сейчас: локальный офлайн-режим</div>
+    </div>
+
+    <button class="ghost-btn full" id="btn-open-hud-editor">НАСТРОИТЬ РАСПОЛОЖЕНИЕ КНОПОК</button>
+
+    <button class="primary-btn" id="btn-settings-close">ГОТОВО</button>
+  </div>
+</div>
+
+<!-- ======================= SCREEN: HOWTO ======================= -->
+<div id="screen-howto" class="screen overlay-screen">
+  <div class="panel wide">
+    <div class="panel-title">УПРАВЛЕНИЕ</div>
+    <div class="howto-grid">
+      <div class="howto-item">
+        <div class="key-combo"><span class="key">W</span><span class="key">A</span><span class="key">S</span><span class="key">D</span></div>
+        <div class="key-desc">Движение игрока</div>
+      </div>
+      <div class="howto-item">
+        <div class="key-combo"><span class="key wide-key">SHIFT</span></div>
+        <div class="key-desc">Дэш-спринт (короткий буст скорости)</div>
+      </div>
+      <div class="howto-item">
+        <div class="key-combo"><span class="key wide-key">ПРОБЕЛ</span></div>
+        <div class="key-desc">Удар по мячу / силовой удар при долгом нажатии</div>
+      </div>
+      <div class="howto-item">
+        <div class="key-combo"><span class="key wide-key">E</span></div>
+        <div class="key-desc">Овердрайв-удар (требует полный OVERCLOCK)</div>
+      </div>
+      <div class="howto-item howto-tip">
+        <div class="tip-label">СОВЕТ</div>
+        <div class="key-desc">Удерживай мяч, обводи защитника, копи серию касаний — метр OVERCLOCK справа заполняется быстрее при удачных обводках и дэшах рядом с соперником.</div>
+      </div>
+      <div class="howto-item howto-tip">
+        <div class="tip-label">МОБИЛЬНЫЕ</div>
+        <div class="key-desc">На сенсорных экранах слева — джойстик, справа — кнопки УДАР и OVERCLOCK.</div>
+      </div>
+    </div>
+    <button class="primary-btn" id="btn-howto-close">ЯСНО</button>
+  </div>
+</div>
+
+<!-- ======================= SCREEN: SQUAD (позиция + скин) ======================= -->
+<div id="screen-squad" class="screen overlay-screen">
+  <div class="panel wide">
+    <div class="panel-title">СОСТАВ</div>
+
+    <div class="setting-row">
+      <label>Твоя позиция на поле</label>
+      <div class="position-grid" id="position-grid"></div>
+    </div>
+
+    <div class="setting-row">
+      <label>Экипированный скин</label>
+      <div class="squad-skin-preview" id="squad-skin-preview">
+        <div class="squad-skin-swatch" id="squad-skin-swatch"></div>
+        <div class="squad-skin-name" id="squad-skin-name">СИНИЙ ПРОТОКОЛ</div>
+        <button class="ghost-btn" id="btn-squad-open-shop">СМЕНИТЬ В МАГАЗИНЕ</button>
+      </div>
+    </div>
+
+    <button class="primary-btn" id="btn-squad-close">ГОТОВО</button>
+  </div>
+</div>
+
+<!-- ======================= SCREEN: LEAGUE SELECT ======================= -->
+<div id="screen-league-select" class="screen overlay-screen">
+  <div class="panel wide">
+    <div class="panel-title">ВЫБОР ЛИГИ</div>
+
+    <div class="setting-row">
+      <label>Название твоей лиги</label>
+      <input type="text" id="set-league-name" maxlength="24" placeholder="ЛИГА ОВЕРКЛОКА" class="text-input">
+    </div>
+
+    <div class="circuit-list" id="circuit-list"></div>
+
+    <button class="primary-btn" id="btn-league-start">СТАРТ</button>
+    <button class="ghost-btn full" id="btn-league-close">НАЗАД</button>
+  </div>
+</div>
+
+<!-- ======================= SCREEN: SHOP ======================= -->
+<div id="screen-shop" class="screen overlay-screen">
+  <div class="panel wide">
+    <div class="panel-title">МАГАЗИН</div>
+
+    <div class="shop-balances">
+      <div class="shop-balance-chip">УРОВЕНЬ <span class="shop-balance-level">1</span></div>
+      <div class="shop-balance-chip">⬡ <span class="shop-balance-shards">0</span></div>
+      <div class="shop-balance-chip">◆ <span class="shop-balance-premium">0</span></div>
+    </div>
+
+    <div class="shop-tabs">
+      <button class="shop-tab active" data-tab="skins">СКИНЫ</button>
+      <button class="shop-tab" data-tab="stats">ПРОКАЧКА</button>
+      <button class="shop-tab" data-tab="currency">ВАЛЮТА</button>
+    </div>
+
+    <div class="shop-panel active" id="shop-panel-skins">
+      <div class="skins-grid" id="shop-skins-grid"></div>
+    </div>
+
+    <div class="shop-panel" id="shop-panel-stats">
+      <div id="shop-stats-list"></div>
+    </div>
+
+    <div class="shop-panel" id="shop-panel-currency">
+      <div class="currency-block">
+        <div class="currency-row">
+          <span>DATA SHARDS — мягкая валюта, зарабатывается матчами</span>
+        </div>
+        <div class="currency-row">
+          <span id="shop-daily-status">Ежедневный бонус доступен</span>
+          <button class="ghost-btn" id="btn-claim-daily">ЗАБРАТЬ</button>
+        </div>
+      </div>
+      <div class="currency-block">
+        <div class="currency-row">
+          <span>OC-КРЕДИТЫ — премиум-валюта, пополняется криптой (TON Connect / GRAM)</span>
+        </div>
+        <div class="currency-row">
+          <button class="ghost-btn full" id="btn-topup-premium">ПОПОЛНИТЬ OC (GRAM)</button>
+        </div>
+      </div>
+    </div>
+
+    <button class="primary-btn" id="btn-shop-close">ГОТОВО</button>
+  </div>
+</div>
+
+<!-- ======================= SCREEN: PROFILE ======================= -->
+<div id="screen-profile" class="screen overlay-screen">
+  <div class="panel wide">
+    <div class="panel-title">ПРОФИЛЬ</div>
+
+    <div class="profile-level-block">
+      <div class="profile-level-num">УР. <span id="profile-level">1</span></div>
+      <div class="xp-track"><div class="xp-fill" id="profile-xp-fill"></div></div>
+      <div class="xp-text" id="profile-xp-text">0 / 100 XP</div>
+    </div>
+
+    <div class="profile-totals" id="profile-totals"></div>
+
+    <div class="setting-row">
+      <label>Достижения</label>
+      <div class="achievements-list" id="achievements-list"></div>
+    </div>
+
+    <button class="primary-btn" id="btn-profile-close">ГОТОВО</button>
+  </div>
+</div>
+
+<!-- ======================= HUD LAYOUT EDITOR BAR ======================= -->
+<div id="hud-editor-bar" class="hud-editor-bar">
+  <div class="hud-editor-hint">ПЕРЕТАЩИ КНОПКИ, КУДА УДОБНО</div>
+  <div class="hud-editor-actions">
+    <button class="ghost-btn" id="btn-hud-mirror">⇄ ЗЕРКАЛО ДЖОЙСТИКА</button>
+    <button class="ghost-btn" id="btn-hud-reset">СБРОСИТЬ</button>
+    <button class="primary-btn" id="btn-hud-done">ГОТОВО</button>
+  </div>
+</div>
+
+<!-- ======================= TOAST ======================= -->
+<div id="toast" class="toast"></div>
+
+<!-- ======================= ROTATE DEVICE NOTICE ======================= -->
+<div id="screen-rotate" class="rotate-notice">
+  <div class="rotate-icon">&#x21BB;</div>
+  <div class="rotate-text">ПОВЕРНИ УСТРОЙСТВО ГОРИЗОНТАЛЬНО</div>
+  <div class="rotate-sub">Поле — широкая плата. Нужен landscape-режим.</div>
+</div>
+
+<!-- ======================= SCREEN: GAME ======================= -->
+<div id="screen-game" class="screen">
+  <canvas id="game-canvas"></canvas>
+
+  <!-- HUD -->
+  <div class="hud">
+    <div class="hud-top">
+      <div class="hud-team home">
+        <div class="hud-team-name" id="hud-home-name">ТЫ</div>
+        <div class="hud-score" id="hud-home-score">0</div>
+      </div>
+
+      <div class="hud-center">
+        <div class="hud-clock" id="hud-clock">3:00</div>
+        <div class="hud-mode-label" id="hud-mode-label">БЫСТРЫЙ МАТЧ</div>
+      </div>
+
+      <div class="hud-team away">
+        <div class="hud-score" id="hud-away-score">0</div>
+        <div class="hud-team-name" id="hud-away-name">CPU</div>
+      </div>
+    </div>
+
+    <div class="hud-overclock-wrap">
+      <div class="hud-overclock-label">OVERCLOCK</div>
+      <div class="hud-overclock-track">
+        <div class="hud-overclock-fill" id="overclock-fill"></div>
+        <div class="hud-overclock-spark" id="overclock-spark"></div>
+      </div>
+    </div>
+
+    <div class="hud-combo" id="hud-combo">
+      <span id="combo-count">0</span> СЕРИЯ
+    </div>
+  </div>
+
+  <!-- Touch controls -->
+  <div class="touch-controls" id="touch-controls">
+    <div class="touch-stick-zone" id="touch-stick-zone">
+      <div class="touch-stick-base">
+        <div class="touch-stick-nub" id="touch-stick-nub"></div>
+      </div>
+    </div>
+    <div class="touch-action-zone">
+      <button class="touch-btn touch-btn-overclock" id="touch-btn-overclock">OC</button>
+      <button class="touch-btn touch-btn-shoot" id="touch-btn-shoot">УДАР</button>
+      <button class="touch-btn touch-btn-switch" id="touch-btn-switch">⇄</button>
+    </div>
+  </div>
+
+  <!-- Goal flash overlay -->
+  <div class="goal-banner" id="goal-banner">
+    <div class="goal-banner-text">ГОЛ!</div>
+    <div class="goal-banner-sub" id="goal-banner-sub"></div>
+  </div>
+
+  <!-- Pause -->
+  <button class="pause-btn" id="btn-pause">II</button>
+</div>
+
+<!-- ======================= SCREEN: PAUSE ======================= -->
+<div id="screen-pause" class="screen overlay-screen">
+  <div class="panel">
+    <div class="panel-title">ПАУЗА</div>
+    <button class="primary-btn" id="btn-resume">ПРОДОЛЖИТЬ</button>
+    <button class="ghost-btn full" id="btn-restart">ПЕРЕЗАПУСТИТЬ МАТЧ</button>
+    <button class="ghost-btn full" id="btn-quit-menu">В ГЛАВНОЕ МЕНЮ</button>
+  </div>
+</div>
+
+<!-- ======================= SCREEN: RESULT ======================= -->
+<div id="screen-result" class="screen overlay-screen">
+  <div class="panel result-panel">
+    <div class="result-headline" id="result-headline">ПОБЕДА</div>
+    <div class="result-score" id="result-score">3 : 1</div>
+
+    <div class="result-stats" id="result-stats">
+      <div class="result-stat">
+        <div class="result-stat-val" id="stat-bestcombo">0</div>
+        <div class="result-stat-label">ЛУЧШАЯ СЕРИЯ</div>
+      </div>
+      <div class="result-stat">
+        <div class="result-stat-val" id="stat-overclocks">0</div>
+        <div class="result-stat-label">OVERCLOCK-УДАРОВ</div>
+      </div>
+      <div class="result-stat">
+        <div class="result-stat-val" id="stat-shots">0</div>
+        <div class="result-stat-label">УДАРОВ ПО ВОРОТАМ</div>
+      </div>
+    </div>
+
+    <div id="result-league-note" class="result-league-note"></div>
+
+    <div class="result-rewards" id="result-rewards">
+      <div class="reward-chip">+<span id="reward-xp">0</span> XP</div>
+      <div class="reward-chip">+<span id="reward-shards">0</span> ⬡</div>
+    </div>
+    <div class="result-levelup" id="result-levelup"></div>
+    <div class="result-tournament" id="result-tournament"></div>
+
+    <button class="primary-btn" id="btn-result-next">ДАЛЬШЕ</button>
+    <button class="ghost-btn full" id="btn-result-menu">В МЕНЮ</button>
+  </div>
+</div>
+
+<script src="js/audio.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/particles.js"></script>
+<script src="js/skins.js"></script>
+<script src="js/progression.js"></script>
+<script src="js/field.js"></script>
+<script src="js/squad.js"></script>
+<script src="js/entities.js"></script>
+<script src="js/physics.js"></script>
+<script src="js/ai.js"></script>
+<script src="js/input.js"></script>
+<script src="js/renderer.js"></script>
+<script src="js/menuBackground.js"></script>
+<script src="js/hudLayout.js"></script>
+<script src="js/tournament.js"></script>
+<script src="js/match.js"></script>
+<script src="js/career.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/shop.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
