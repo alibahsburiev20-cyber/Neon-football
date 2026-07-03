@@ -1,0 +1,11 @@
+name = "neon-circuit-fc-tournament"
+main = "src/index.js"
+compatibility_date = "2026-06-01"
+
+# После `wrangler d1 create neon-circuit-fc-db` подставь сюда полученный
+# database_id (wrangler выведет его в консоль и добавит в этот файл сам,
+# если использовать --binding так, как описано в README.md рядом).
+[[d1_databases]]
+binding = "DB"
+database_name = "neon-circuit-fc-db"
+database_id = "REPLACE_WITH_YOUR_DATABASE_ID"
